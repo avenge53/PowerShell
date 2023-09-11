@@ -1,3 +1,4 @@
 #comment
+#comment again
 
-Get-eventlog -loganame system
+Get-eventlog -logname system
