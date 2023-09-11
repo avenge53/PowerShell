@@ -4,9 +4,9 @@ Import-Module ActiveDirectory
 
 new-ADgroup 'Engineers' -Path 'OU=Managers, DC=adatum, DC=com' -GroupScope Global -GroupCategory Distribution
 
-$users = @(Alfie Power, Erin Bull, Sarah Burch)
+$users = @("Alfie Power", "Erin Bull", "Sarah Burch")
 
-$groupname = 'Engineers' 
+$groupname = @('Engineers')
 
 foreach ($user in $users){
     Add-ADGroupMember -Identity $groupname -Members $users
