@@ -1,0 +1,3 @@
+
+
+Get-eventlog -loganame system
