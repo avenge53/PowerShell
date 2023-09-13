@@ -1,8 +1,9 @@
 #Get Active Directory#
 Import-Module ActiveDirectory
 
-#Identify workstations#
+#Identify objects#
 $availableworkstations = @('LON-CL1','SVR-CL1', 'LON-DC1')
+$groups = @('IT','Sales','Research','Marketing','Development','Managers')
 
 #Identify software package#
 $softwarepackage = $software
