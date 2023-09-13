@@ -1,1 +1,5 @@
 $groups = @('IT','Sales','Research','Marketing','Development','Managers')
+
+Enable-PSRemoting $workstation
+
+Test-WSMan 'LON-CL1'

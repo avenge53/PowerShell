@@ -2,11 +2,12 @@
 Import-Module ActiveDirectory
 
 # Identify objects #
-$availableWorkstations = @('LON-CL1','SVR-CL1', 'LON-DC1')
+$availableWorkstations = @('LON-CL1','LON-SVR1', 'LON-DC1')
 
 # Identify software package #
+$softwareName = "Git"
 $softwarepackage = $software
-$Installerpath = "E:\clamwin-0.103.2.1-setup.exe"
+
 
 # Loop to add up to 10 users #
 for ($u=0; $u -lt 10; $u++)
@@ -18,7 +19,7 @@ for ($u=0; $u -lt 10; $u++)
     $Firstname = Read-Host "Enter the First name of the new employee"
     $Lastname = Read-Host "Enter the Last name of the new employee"
     
-    New-ADUser -Name "$FirstName $LastName" -GivenName $Firstname -Surname $Lastname -UserPrincipalName $username -SamAccountName $username -Enabled $true -AccountPassword $securepassword 
+    New-ADUser -Name "$Firstname $Lastname" -GivenName $Firstname -Surname $Lastname -UserPrincipalName $username -SamAccountName $username -Enabled $true -AccountPassword $securepassword 
    
     #...rest of user input #
     # Add user to group #
@@ -30,7 +31,7 @@ for ($u=0; $u -lt 10; $u++)
     $workstation = $availableWorkstations[0] 
 
     { 
-        if ($availableWorkstations.Length -eq 0) 
+        if ($availableWorkstations.Length -eq 0)
             {
             Write-Output "No more available workstations."
             break
@@ -41,24 +42,36 @@ for ($u=0; $u -lt 10; $u++)
     $availableWorkstations = $availableWorkstations[1..($availableWorkstations.Length - 1)] 
 
     # Install software on workstation #
-    Foreach ($software in $softwarepackage) 
-    {
-        Invoke-Command -ComputerName $workstation -ScriptBlock | out-null
-        {
-        Start-Process -FilePath $InstallerPath -ArgumentList "/S" -Wait
-        Write-Output "Installing $software on $workstation"
-        }
-    } 
+    $InstallerPath = "E:\Git-2.42.0.2-64-bit.exe"
     
-    $manageremail = Read-Host "Enter the manager's email of the new employee"
-   
-    # Send a welcome email with login details to the employee's manager (using Send-MailMessage cmdlet) #
-        $emailParams = @{
-        To         = $managerEmail
-        From       = "admin@Adatum.com"
-        Subject    = "Welcome $FirstName $LastName"
-        Body       = "Hello, `$n`n$FirstName $LastName has been onboarded successfully. Their username is $userName. `$n`nThanks,`$nIT Team"
-                        }
+    Foreach ($software in $softwarepackage) 
+        {
+        Invoke-Command -ComputerName $workstation -ScriptBlock
+            {
+        Start-Process -FilePath $InstallerPath -ArgumentList "/S" -Wait 
+            } | out-null
+        
+            Write-Output "Installing $softwareName on $workstation"
+        }
+
+    # Verify software installation #    
+      $installedSoftware = Invoke-Command -ComputerName $workstation -ScriptBlock {}
+            {
+            Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName
+            } 
+            
+        if ($installedSoftware.DisplayName -contains $softwareName) 
+            {
+            Write-Output "$softwareName is installed on $workstation."
+            } 
+      else  
+            {
+            Write-Output "$softwareName is NOT installed on $workstation."
+            }
+
+       
+                        
+
 
 
 }
