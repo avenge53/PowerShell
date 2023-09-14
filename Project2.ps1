@@ -9,6 +9,9 @@ $SoftwareName = "Git"
 $Software = 'E:\Git-2.42.0.2-64-bit.exe'
 $SoftwarePackage = $Software
 
+# Allow PowerShell remoting to all workstations #
+Enable-PSRemoting
+
 # Loop to add up to 10 users #
 for ($u=0; $u -lt 10; $u++)
 { 
@@ -31,6 +34,7 @@ for ($u=0; $u -lt 10; $u++)
             Write-Output "No more available workstations."
             break
             }
+   
     # Assign first available workstation #
     $WorkStation = $AvailableWorkstations[0]     
     
@@ -38,14 +42,12 @@ for ($u=0; $u -lt 10; $u++)
     $AvailableWorkstations = $AvailableWorkstations[1..($AvailableWorkstations.Length - 1)] 
 
     # Install software on workstation #
-    
-    
     Foreach ($Software in $SoftwarePackage) 
         {
-        Invoke-Command -ComputerName $WorkStation -ScriptBlock {Enable-PSRemoting}
-            {
+        Invoke-Command -ComputerName $WorkStation -ScriptBlock {}
+            
         Start-Process -FilePath ${Using}$Software -ArgumentList "/S" -Wait 
-            } 
+             
         
             Write-Output "Installing $SoftwareName on $workStation"
         }
@@ -60,7 +62,7 @@ for ($u=0; $u -lt 10; $u++)
             {
             Write-Output "$SoftwareName is installed on $WorkStation."
             } 
-      else  
+        else  
             {
             Write-Output "$SoftwareName is NOT installed on $WorkStation."
             }
