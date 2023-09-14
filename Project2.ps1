@@ -30,35 +30,35 @@ for ($u=0; $u -lt 10; $u++)
     # Assign first available workstation #
     $workstation = $availableWorkstations[0] 
 
-    { 
+     
         if ($availableWorkstations.Length -eq 0)
             {
             Write-Output "No more available workstations."
             break
             }
-    }
+    
 
     # Remove assigned workstation #
     $availableWorkstations = $availableWorkstations[1..($availableWorkstations.Length - 1)] 
 
     # Install software on workstation #
-    $InstallerPath = "E:\Git-2.42.0.2-64-bit.exe"
+    $InstallerPath = 'E:\Git-2.42.0.2-64-bit.exe'
     
     Foreach ($software in $softwarepackage) 
         {
         Invoke-Command -ComputerName $workstation -ScriptBlock
             {
-        Start-Process -FilePath $InstallerPath -ArgumentList "/S" -Wait 
-            } | out-null
+        Start-Process -FilePath ${using}$InstallerPath -ArgumentList "/S" -Wait 
+            } 
         
             Write-Output "Installing $softwareName on $workstation"
         }
 
     # Verify software installation #    
       $installedSoftware = Invoke-Command -ComputerName $workstation -ScriptBlock {}
-            {
+            
             Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName
-            } 
+             
             
         if ($installedSoftware.DisplayName -contains $softwareName) 
             {
