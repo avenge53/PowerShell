@@ -12,6 +12,15 @@ $SoftwarePackage = $Software
 # Allow PowerShell remoting to all workstations #
 Enable-PSRemoting
 
+# Create firewall rule for remote installation #
+foreach ($WorkStation in $AvailableWorkstations) {
+       
+    Invoke-Command -ComputerName $WorkStation -ScriptBlock {
+    
+    New-NetFirewallRule -DisplayName "Allow WinRM over HTTPS" -Direction Inbound -LocalPort 5986 -Protocol TCP -Action Allow
+    }
+}
+
 # Loop to add up to 10 users #
 for ($u=0; $u -lt 10; $u++)
 { 
@@ -44,12 +53,12 @@ for ($u=0; $u -lt 10; $u++)
     # Install software on workstation #
     Foreach ($Software in $SoftwarePackage) 
         {
-        Invoke-Command -ComputerName $WorkStation -ScriptBlock {}
+        Invoke-Command -ComputerName $WorkStation -ScriptBlock {
             
         Start-Process -FilePath ${Using}$Software -ArgumentList "/S" -Wait 
-             
+        }   
         
-            Write-Output "Installing $SoftwareName on $workStation"
+            Write-Output "Installing $SoftwareName on $WorkStation"
         }
 
     # Verify software installation #    
@@ -58,7 +67,7 @@ for ($u=0; $u -lt 10; $u++)
             Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName
             } 
             
-        if ($installedSoftware.DisplayName -contains $softwareName) 
+        if ($InstalledSoftware.DisplayName -contains $SoftwareName) 
             {
             Write-Output "$SoftwareName is installed on $WorkStation."
             } 
@@ -67,11 +76,7 @@ for ($u=0; $u -lt 10; $u++)
             Write-Output "$SoftwareName is NOT installed on $WorkStation."
             }
 
-       
-                        
-
-
-
+        
 }
 
 
