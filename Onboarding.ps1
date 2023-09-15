@@ -2,7 +2,7 @@
 Import-Module ActiveDirectory
 
 # Identify objects #
-$AvailableWorkstations = @('LON-CL1','LON-SVR1', 'LON-DC1')
+$AvailableWorkstations = @('LON-CL1', 'LON-SVR1', 'LON-DC1')
 
 # Identify software package #
 $SoftwareName = "Git"
@@ -14,17 +14,16 @@ $SoftwarePackage = $Software
 Enable-PSRemoting
 
 # Create firewall rule for remote installation #
- $Session = New-PSSession -ComputerName LON-DC1,LON-DC1,LON-SVR1 
+$Session = New-PSSession -ComputerName LON-DC1, LON-DC1, LON-SVR1 
        
-    Invoke-Command -Session $Session -ScriptBlock {
+Invoke-Command -Session $Session -ScriptBlock {
     
     New-NetFirewallRule -DisplayName "Allow WinRM over HTTPS" -Direction Inbound -LocalPort 5986 -Protocol TCP -Action Allow
-    }
+}
 
 
 # Loop to add up to 10 users #
-for ($u=0; $u -lt 10; $u++)
-{ 
+for ($u = 0; $u -lt 10; $u++) { 
         
     # Create user #
     $UserName = Read-Host "Enter the username of the new employee" 
@@ -37,13 +36,12 @@ for ($u=0; $u -lt 10; $u++)
     # Input additional user details and add user to group #
     $Groups = Read-Host "Enter the user group for new employee (comma-separated)"
     $GroupArray = $Groups -split ","
-    $GroupArray | Foreach-Object { Add-ADGroupMember -Identity $_.Trim() -Members $UserName}
+    $GroupArray | Foreach-Object { Add-ADGroupMember -Identity $_.Trim() -Members $UserName }
     
-    if ($AvailableWorkstations.Length -eq 0)
-            {
-            Write-Output "No more available workstations."
-            break
-            }
+    if ($AvailableWorkstations.Length -eq 0) {
+        Write-Output "No more available workstations."
+        break
+    }
    
     # Assign first available workstation #
     $WorkStation = $AvailableWorkstations[0]     
@@ -52,30 +50,27 @@ for ($u=0; $u -lt 10; $u++)
     $AvailableWorkstations = $AvailableWorkstations[1..($AvailableWorkstations.Length - 1)] 
 
     # Install software on workstation #
-    Foreach ($Software in $SoftwarePackage) 
-        {
+    Foreach ($Software in $SoftwarePackage) {
         Invoke-Command -ComputerName $WorkStation -ScriptBlock {
             
-        Start-Process -FilePath ${Using}$Software -ArgumentList "/S" -Wait 
+            Start-Process -FilePath ${Using}$Software -ArgumentList "/S" -Wait 
         }   
         
-            Write-Output "Installing $SoftwareName on $WorkStation"
-        }
+        Write-Output "Installing $SoftwareName on $WorkStation"
+    }
 
     # Verify software installation #    
-      $InstalledSoftware = Invoke-Command -ComputerName $WorkStation -ScriptBlock {
+    $InstalledSoftware = Invoke-Command -ComputerName $WorkStation -ScriptBlock {
             
-            Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName
-            } 
+        Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName
+    } 
             
-        if ($InstalledSoftware.DisplayName -contains $SoftwareName) 
-            {
-            Write-Output "$SoftwareName is installed on $WorkStation."
-            } 
-        else  
-            {
-            Write-Output "$SoftwareName is NOT installed on $WorkStation."
-            }
+    if ($InstalledSoftware.DisplayName -contains $SoftwareName) {
+        Write-Output "$SoftwareName is installed on $WorkStation."
+    } 
+    else {
+        Write-Output "$SoftwareName is NOT installed on $WorkStation."
+    }
 
         
 }
