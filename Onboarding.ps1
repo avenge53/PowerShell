@@ -9,17 +9,18 @@ $SoftwareName = "Git"
 $Software = 'E:\Git-2.42.0.2-64-bit.exe'
 $SoftwarePackage = $Software
 
+
 # Allow PowerShell remoting to all workstations #
 Enable-PSRemoting
 
 # Create firewall rule for remote installation #
-foreach ($WorkStation in $AvailableWorkstations) {
+ $Session = New-PSSession -ComputerName LON-DC1,LON-DC1,LON-SVR1 
        
-    Invoke-Command -ComputerName $WorkStation -ScriptBlock {
+    Invoke-Command -Session $Session -ScriptBlock {
     
     New-NetFirewallRule -DisplayName "Allow WinRM over HTTPS" -Direction Inbound -LocalPort 5986 -Protocol TCP -Action Allow
     }
-}
+
 
 # Loop to add up to 10 users #
 for ($u=0; $u -lt 10; $u++)
