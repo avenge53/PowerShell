@@ -52,8 +52,8 @@ for ($u = 0; $u -lt 10; $u++) {
     # Install software on workstation #
     Foreach ($Software in $SoftwarePackage) {
         Invoke-Command -ComputerName $WorkStation -ScriptBlock {
-            
-            Start-Process -FilePath ${Using}$Software -ArgumentList "/S" -Wait 
+       
+            Start-Process -FilePath $Software -ArgumentList "/S" -Wait 
         }   
         
         Write-Output "Installing $SoftwareName on $WorkStation"
